@@ -1,4 +1,4 @@
-import { isReactive, isReadonly, readonly } from '../reactive'
+import { isReactive, isReadonly, readonly, isProxy } from '../reactive'
 describe("readonly", () => {
     it("happy path", () => {
         const original = ({
@@ -12,6 +12,9 @@ describe("readonly", () => {
         expect(wrapper.foo).toBe(1)
         expect(isReactive(wrapper)).toBe(false)
         expect(isReadonly(wrapper)).toBe(true)
+        expect(isProxy(wrapper)).toBe(true)
+        expect(isReadonly(wrapper.bar)).toBe(true)
+        expect(isReadonly(original.bar)).toBe(false)
         expect(isReadonly(original)).toBe(false)
     })
 

@@ -1,5 +1,8 @@
 import { extend } from "../shared";
 
+
+let activeEffect;
+let shouldTrack = false
 class ReactiveEffect{
     private _fn: any;
     public scheduler: any;
@@ -13,7 +16,16 @@ class ReactiveEffect{
     }
     run() {
         activeEffect = this
-        return this._fn();
+        // 1. 会收集依赖
+        //     shouldTrack来作区分
+        if(!this.active) {
+            return this._fn();
+        }
+        shouldTrack = true
+        activeEffect = this
+        const res =  this._fn()
+        shouldTrack = false
+        return res
     }
     stop() {
         if(this.active) {
@@ -29,8 +41,8 @@ function cleanupEffect(effect) {
     effect.deps.forEach((dep: any) => {
         dep.delete(effect)
     })
+    effect.deps.length = 0
 }
-let activeEffect;
 const targetMap = new WeakMap()
 
 export function effect(fn, options: any  = {}) {
@@ -56,11 +68,18 @@ export function track(target, key) {
         dep = new Set();
         depsMap.set(key, dep)
     }
-    if(!activeEffect) return
+    if(!isTracking()) return
+
+    if(dep.has(activeEffect)) return
     dep.add(activeEffect)
     activeEffect.deps.push(dep)
 
 }
+
+function isTracking() {
+    return shouldTrack && activeEffect !== undefined
+}
+
 export function trigger(target, key) {
     let depsMap = targetMap.get(target)
     let dep = depsMap.get(key)
