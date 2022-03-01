@@ -1,5 +1,5 @@
-import { h } from '../../lib/guide-mini-vue.esm.js'
-
+import { h, ref } from '../../lib/guide-mini-vue.esm.js'
+import { Foo } from './Foo.js'
 window.self = null
 export const App = {
     // .vue
@@ -9,14 +9,19 @@ export const App = {
         window.self = this
         return h("div", {
             id: 'root',
-            class: ['red', 'head']
+            class: ['red', 'head'],
+            onClick() {
+                console.log('click')
+            }
         }, 
-        'hi ' + this.msg
+        [h('div', {}, 'hi ' + this.msg.value), h(Foo, {
+            count:1
+        })]
         )
     },
     setup() {
         return {
-            msg: "mini-vue"
+            msg: ref(10)
         }
     }
 }
