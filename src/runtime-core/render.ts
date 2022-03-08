@@ -1,6 +1,7 @@
 import { isObject } from "../shared/index"
 import { ShapeFlags } from "../shared/ShapeFlags"
 import { createComponentInstance, setupComponent } from "./component"
+import { Fragmnet, Text } from "./vnode"
 
 export function render(vnode, container) {
     // patch 方便递归的处理
@@ -13,13 +14,37 @@ function patch(vnode, container) {
     // ShapeFlags
     // vnode -> flag
     // element
-    const { ShapeFlag } = vnode
-    if(ShapeFlag & ShapeFlags.ELEMENT) {
-        processElement(vnode, container)
+    const { type, ShapeFlag } = vnode
+    // Fragment --> 只渲染所有的children
+    switch(type) {
+        case Fragmnet:
+            processFragment(vnode, container)
+            break;
+        case Text:
+            processText(vnode, container)
+            break;
+        default:
+            if(ShapeFlag & ShapeFlags.ELEMENT) {
+                processElement(vnode, container)
+            }
+            if(ShapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
+                processComponent(vnode, container)
+            }
+            break
     }
-    if(ShapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
-        processComponent(vnode, container)
-    }
+
+
+    
+}
+
+function processFragment(vnode, container) {
+    // Implement
+    mountChildren(vnode, container)
+}
+function processText(vnode, container) {
+    const { children } = vnode
+    const textNode = document.createTextNode(children)
+    container.append(textNode)
 }
 function processElement(vnode, contaienr) {
     mountElement(vnode, contaienr)
