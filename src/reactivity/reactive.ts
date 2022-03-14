@@ -32,7 +32,6 @@ export function isProxy(value) {
 
 function createActiveObject(raw: any, baseHandlers) {
   if(!isObject(raw)) {
-    console.log('target must be an object')
     return
   }
   return new Proxy(raw, baseHandlers)
