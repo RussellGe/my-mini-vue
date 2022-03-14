@@ -1,4 +1,4 @@
-import { h, ref } from '../../lib/guide-mini-vue.esm.js'
+import { h } from '../../lib/guide-mini-vue.esm.js'
 import { Foo } from './Foo.js'
 window.self = null
 export const App = {
@@ -21,7 +21,7 @@ export const App = {
     },
     setup() {
         return {
-            msg: ref(10)
+            msg: 10
         }
     }
 }

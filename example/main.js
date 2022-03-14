@@ -1,5 +1,5 @@
 import { createApp } from '../lib/guide-mini-vue.esm.js'
-import { App } from './apiInject/App.js'
+import { App } from './helloworld/App.js'
 
 const rootContainer = document.getElementById('app')
 createApp(App).mount(rootContainer)
