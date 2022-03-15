@@ -138,8 +138,9 @@ export function createRenderer(options) {
   }
   function patchKeyedChildren(c1, c2, container, parentComponent, anchor) {
     let i = 0;
+    const l2 = c2.length;
     let e1 = c1.length - 1;
-    let e2 = c2.length - 1;
+    let e2 = l2 - 1;
     function isSameVnodeType(n1, n2) {
       return n1.type === n2.type && n1.key === n2.key;
     }
@@ -171,10 +172,50 @@ export function createRenderer(options) {
     // 新的比老的多 创建
     if (i > e1) {
       if (i <= e2) {
-        const nextPos = i + 1;
-        const anchor = nextPos > c2.length - 1 ? null : c2[nextPos].el;
-        console.log(nextPos, anchor);
-        patch(null, c2[i], container, parentComponent, anchor);
+        const nextPos = e2 + 1;
+        const anchor = nextPos < l2 ? c2[nextPos].el : null;
+        while (i <= e2) {
+          patch(null, c2[i], container, parentComponent, anchor);
+          i++;
+        }
+      }
+    } else if (i > e2) {
+      while (i <= e1) {
+        hostRemove(c1[i].el);
+        i++;
+      }
+    } else {
+      let s1 = i;
+      let s2 = i;
+      let toBePatched = e2 - s2 + 1;
+      let patched = 0;
+      const keyToNewIndexMap = new Map();
+      for (let i = s2; i <= e2; i++) {
+        const nextChild = c2[i];
+        keyToNewIndexMap.set(nextChild.key, i);
+      }
+      let newIndex;
+      for (let i = s1; i <= e1; i++) {
+        const prevChild = c1[i];
+        if (patched >= toBePatched) {
+          hostRemove(prevChild.el);
+        }
+        if (prevChild.key != null) {
+          newIndex = keyToNewIndexMap.get(prevChild.key);
+        } else {
+          for (let j = s2; j < e2; j++) {
+            if (isSameVnodeType(prevChild, c2[j])) {
+              newIndex = j;
+              break;
+            }
+          }
+        }
+        if (newIndex === undefined) {
+          hostRemove(prevChild.el);
+        } else {
+          patch(prevChild, c2[newIndex], container, parentComponent, null);
+          patched++;
+        }
       }
     }
   }
