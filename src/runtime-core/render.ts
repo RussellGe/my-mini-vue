@@ -3,7 +3,7 @@ import { EMPTY_OBJ } from "../shared";
 import { ShapeFlags } from "../shared/ShapeFlags";
 import { createComponentInstance, setupComponent } from "./component";
 import { createAppAPI } from "./createApp";
-import { Fragmnet, Text } from "./vnode";
+import { Fragment, Text } from "./vnode";
 
 export function createRenderer(options) {
   const {
@@ -11,7 +11,8 @@ export function createRenderer(options) {
     patchProp: hostPatchProp,
     insert: hostInsert,
     remove: hostRemove,
-    setElementText: hostSetElementText,s
+    setElementText: hostSetElementText,
+    s,
   } = options;
   function render(vnode, container) {
     // patch 方便递归的处理
@@ -27,7 +28,7 @@ export function createRenderer(options) {
     const { type, ShapeFlag } = n2;
     // Fragment --> 只渲染所有的children
     switch (type) {
-      case Fragmnet:
+      case Fragment:
         processFragment(n1, n2, container, parentComponent, anchor);
         break;
       case Text:
@@ -171,8 +172,8 @@ export function createRenderer(options) {
     if (i > e1) {
       if (i <= e2) {
         const nextPos = i + 1;
-        const anchor = nextPos > c2.length-1 ? null : c2[nextPos].el
-        console.log(nextPos, anchor)
+        const anchor = nextPos > c2.length - 1 ? null : c2[nextPos].el;
+        console.log(nextPos, anchor);
         patch(null, c2[i], container, parentComponent, anchor);
       }
     }
