@@ -1,3 +1,4 @@
+export { nextTick } from "./scheduler";
 export { createRenderer } from "./render";
 export { inject, provide } from "./apiInject";
 export { getCurrentInstance } from "./component";
