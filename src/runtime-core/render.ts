@@ -69,10 +69,10 @@ export function createRenderer(options) {
     // string
     const { children, ShapeFlag } = vnode;
     if (ShapeFlag & ShapeFlags.TEXT_CHILDREN) {
-      el.textContent = children;
+      hostSetElementText(el, children)
     }
     if (ShapeFlag & ShapeFlags.ARRAY_CHILDREN) {
-      mountChildren(vnode.children, el, parentComponent, anchor);
+      mountChildren(children, el, parentComponent, anchor);
     }
 
     // TODO array
