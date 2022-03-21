@@ -14,7 +14,8 @@ export function createRenderer(options) {
     insert: hostInsert,
     remove: hostRemove,
     setElementText: hostSetElementText,
-    s,
+    setText: hostSetText,
+    createText: hostCreateText,
   } = options;
   function render(vnode, container) {
     // patch 方便递归的处理
@@ -52,9 +53,24 @@ export function createRenderer(options) {
     mountChildren(n2.children, container, parentComponent, anchor);
   }
   function processText(n1, n2, container) {
-    const { children } = n2;
-    const textNode = document.createTextNode(children);
-    container.append(textNode);
+    console.log("处理 Text 节点");
+    if (n1 === null) {
+      // n1 是 null 说明是 init 的阶段
+      // 基于 createText 创建出 text 节点，然后使用 insert 添加到 el 内
+      console.log("初始化 Text 类型的节点");
+      hostInsert((n2.el = hostCreateText(n2.children as string)), container);
+    } else {
+      // update
+      // 先对比一下 updated 之后的内容是否和之前的不一样
+      // 在不一样的时候才需要 update text
+      // 这里抽离出来的接口是 setText
+      // 注意，这里一定要记得把 n1.el 赋值给 n2.el, 不然后续是找不到值的
+      const el = (n2.el = n1.el!);
+      if (n2.children !== n1.children) {
+        console.log("更新 Text 类型的节点");
+        hostSetText(el, n2.children as string);
+      }
+    }
   }
   function processElement(n1, n2, container, parentComponent, anchor) {
     if (!n1) {

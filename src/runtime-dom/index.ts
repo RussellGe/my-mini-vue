@@ -20,6 +20,14 @@ function insert(child, parent, anchor) {
   parent.insertBefore(child, anchor || null);
 }
 
+function createText(text) {
+  return document.createTextNode(text);
+}
+
+function setText(node, text) {
+  node.nodeValue = text;
+}
+
 function remove(child) {
   const parent = child.parentNode;
   if (parent) {
@@ -37,6 +45,8 @@ const renderer: any = createRenderer({
   insert,
   remove,
   setElementText,
+  createText,
+  setText
 });
 
 export function createApp(...args) {
