@@ -19,4 +19,7 @@ export const camelize = (str: string) => {
     return c ? c.toUpperCase() : "";
   });
 };
+
+export const isOn = (key) => /^on[A-Z]/.test(key);
+
 export const EMPTY_OBJ = {};

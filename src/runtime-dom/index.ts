@@ -1,15 +1,27 @@
 import { createRenderer } from "../runtime-core";
+import { isOn } from "../shared";
 
 function createElement(type) {
   return document.createElement(type);
 }
 function patchProp(el, key, preVal, nextVal) {
-  const isOn = (key) => /^on[A-Z]/.test(key);
   if (isOn(key)) {
-    const event = key.slice(2).toLowerCase();
-    el.addEventListener(event, nextVal);
+    const invokers = el._vei || (el._vei = {});
+    const existingInvoker = invokers[key];
+    if (nextVal && existingInvoker) {
+      existingInvoker.value = nextVal;
+    } else {
+      const eventName = key.slice(2).toLowerCase();
+      if (nextVal) {
+        const invoker = (invokers[key] = nextVal);
+        el.addEventListener(eventName, invoker);
+      } else {
+        el.removeEventListener(eventName, existingInvoker);
+        invokers[key] = undefined;
+      }
+    }
   } else {
-    if (nextVal === undefined || nextVal === null) {
+    if (nextVal === null || nextVal === "") {
       el.removeAttribute(key);
     } else {
       el.setAttribute(key, nextVal);
