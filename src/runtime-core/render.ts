@@ -22,12 +22,6 @@ export function createRenderer(options) {
     patch(null, vnode, container, null, null);
   }
   function patch(n1, n2, container, parentComponent, anchor) {
-    // 处理组件
-    // TODO 判断vnode是不是element
-
-    // ShapeFlags
-    // vnode -> flag
-    // element
     const { type, ShapeFlag } = n2;
     // Fragment --> 只渲染所有的children
     switch (type) {
