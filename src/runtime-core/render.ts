@@ -79,7 +79,7 @@ export function createRenderer(options) {
     // string
     const { children, ShapeFlag } = vnode;
     if (ShapeFlag & ShapeFlags.TEXT_CHILDREN) {
-      hostSetElementText(el, children)
+      hostSetElementText(el, children);
     }
     if (ShapeFlag & ShapeFlags.ARRAY_CHILDREN) {
       mountChildren(children, el, parentComponent, anchor);
@@ -123,7 +123,7 @@ export function createRenderer(options) {
       instance.update();
     } else {
       n2.el = n1.el;
-      n2.vnode = n2
+      n2.vnode = n2;
     }
   }
 
@@ -312,35 +312,38 @@ export function createRenderer(options) {
     setupRenderEffect(instance, initialVnode, container, anchor);
   }
   function setupRenderEffect(instance, initialVnode, container, anchor) {
-    instance.update = effect(() => {
-      if (!instance.isMounted) {
-        const { proxy } = instance;
-        const subTree = (instance.subtree = instance.render.call(proxy));
+    instance.update = effect(
+      () => {
+        if (!instance.isMounted) {
+          const { proxy } = instance;
+          const subTree = (instance.subtree = instance.render.call(proxy));
 
-        // vnode -> patch
-        // vnode -> element -> mount
-        patch(null, subTree, container, instance, anchor);
+          // vnode -> patch
+          // vnode -> element -> mount
+          patch(null, subTree, container, instance, anchor);
 
-        initialVnode.el = subTree.el;
-        instance.isMounted = true;
-      } else {
-        const { next, vnode } = instance;
-        if (next) {
-          next.el = vnode.el;
-          updateComponentPreRender(instance, next);
+          initialVnode.el = subTree.el;
+          instance.isMounted = true;
+        } else {
+          const { next, vnode } = instance;
+          if (next) {
+            next.el = vnode.el;
+            updateComponentPreRender(instance, next);
+          }
+
+          const { proxy } = instance;
+          const subtree = instance.render.call(proxy);
+          const prevSubTree = instance.subtree;
+          patch(prevSubTree, subtree, container, instance, anchor);
         }
-
-        const { proxy } = instance;
-        const subtree = instance.render.call(proxy);
-        const prevSubTree = instance.subtree;
-        patch(prevSubTree, subtree, container, instance, anchor);
+      },
+      {
+        scheduler() {
+          console.log("update -- scheduler");
+          queueJobs(instance.update);
+        },
       }
-    }, {
-      scheduler() {
-        console.log('update -- scheduler')
-        queueJobs(instance.update)
-      }
-    });
+    );
   }
   return {
     createApp: createAppAPI(render),
