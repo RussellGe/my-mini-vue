@@ -19,7 +19,7 @@ function parseInterpolation(context) {
   const closeIndex = context.source.indexOf("}}", openDelimiter.length);
   advanceBy(context, openDelimiter.length);
   const rawContentLength = closeIndex - openDelimiter.length;
-  const rawContent = context.source.slice(0, rawContentLength);
+  const rawContent = parseTextData(context, rawContentLength);
   const content = rawContent.trim();
   advanceBy(context, rawContentLength + closeDelimiter.length);
   return {
@@ -35,14 +35,12 @@ function parseElement(context) {
   const element = parseTag(context, TagType.Start);
 
   parseTag(context, TagType.End);
-  console.log("------", context.source);
   return element;
 }
 
 function parseTag(context, tagType: TagType) {
   // 1. 解析div
   const match: any = /^<\/?([a-z]*)/i.exec(context.source);
-  console.log(match);
 
   const tag = match[1];
   advanceBy(context, match[0].length + 1);
@@ -53,8 +51,24 @@ function parseTag(context, tagType: TagType) {
     tags: tag,
   };
 }
+
+function parseText(context) {
+  const content = parseTextData(context, context.source.length);
+  advanceBy(context, context.source.length);
+  console.log('text', context.source)
+  return {
+    type: NodeTypes.TEXT,
+    content: content,
+  };
+}
+
 function advanceBy(context: any, length: number) {
   context.source = context.source.slice(length);
+}
+
+function parseTextData(context, length: number) {
+    const content = context.source.slice(0, length);
+    return content
 }
 
 function parseChildren(context) {
@@ -67,6 +81,8 @@ function parseChildren(context) {
     if (/[a-z]/i.test(s[1])) {
       node = parseElement(context);
     }
+  } else {
+    node = parseText(context);
   }
   nodes.push(node);
 
