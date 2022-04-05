@@ -8,7 +8,7 @@ const enum TagType {
 export function baseParse(content: string) {
   const context = createParseContext(content);
   return createRoot({
-    children: parseChildren(context),
+    children: parseChildren(context, []),
   });
 }
 
@@ -21,7 +21,7 @@ function parseInterpolation(context) {
   const rawContentLength = closeIndex - openDelimiter.length;
   const rawContent = parseTextData(context, rawContentLength);
   const content = rawContent.trim();
-  advanceBy(context, rawContentLength + closeDelimiter.length);
+  advanceBy(context, closeDelimiter.length);
   return {
     type: NodeTypes.INTERPOLATION,
     content: {
@@ -31,13 +31,19 @@ function parseInterpolation(context) {
   };
 }
 
-function parseElement(context) {
-  const element = parseTag(context, TagType.Start);
-
-  parseTag(context, TagType.End);
+function parseElement(context, ancestors) {
+  const element: any = parseTag(context, TagType.Start);
+  ancestors.push(element);
+  const children = parseChildren(context, ancestors);
+  element.children = children;
+  ancestors.pop();
+  if (startsWithEndTagOpen(context.source, element.tag)) {
+    parseTag(context, TagType.End);
+  } else {
+    throw new Error(`缺少结束标签${element.tag}`);
+  }
   return element;
 }
-
 function parseTag(context, tagType: TagType) {
   // 1. 解析div
   const match: any = /^<\/?([a-z]*)/i.exec(context.source);
@@ -48,14 +54,31 @@ function parseTag(context, tagType: TagType) {
   if (tagType === TagType.End) return;
   return {
     type: NodeTypes.ELEMENT,
-    tags: tag,
+    tag: tag,
   };
 }
 
+function startsWithEndTagOpen(source, tag) {
+  return (
+    source.startsWith("<") &&
+    source.slice(2, 2 + tag.length).toLowerCase() === tag.toLowerCase()
+  );
+}
+
 function parseText(context) {
-  const content = parseTextData(context, context.source.length);
-  advanceBy(context, context.source.length);
-  console.log('text', context.source)
+  let stopIndex = context.source.length;
+  const endToken = ["{{", "<"];
+  for (const token of endToken) {
+    if (
+      context.source.indexOf(token) < stopIndex &&
+      context.source.indexOf(token) !== -1
+    ) {
+      stopIndex = context.source.indexOf(token);
+    }
+  }
+
+  const content = parseTextData(context, stopIndex);
+  console.log("text", context.source);
   return {
     type: NodeTypes.TEXT,
     content: content,
@@ -67,26 +90,43 @@ function advanceBy(context: any, length: number) {
 }
 
 function parseTextData(context, length: number) {
-    const content = context.source.slice(0, length);
-    return content
+  const content = context.source.slice(0, length);
+  advanceBy(context, length);
+  return content;
 }
 
-function parseChildren(context) {
+function parseChildren(context, ancestors) {
   const nodes: any = [];
-  const s = context.source;
-  let node;
-  if (s.startsWith("{{")) {
-    node = parseInterpolation(context);
-  } else if (s[0] === "<") {
-    if (/[a-z]/i.test(s[1])) {
-      node = parseElement(context);
+  while (!isEnd(context, ancestors)) {
+    const s = context.source;
+    let node;
+    if (s.startsWith("{{")) {
+      node = parseInterpolation(context);
+    } else if (s[0] === "<") {
+      if (/[a-z]/i.test(s[1])) {
+        node = parseElement(context, ancestors);
+      }
+    } else {
+      node = parseText(context);
     }
-  } else {
-    node = parseText(context);
+    console.log("new node", node);
+    nodes.push(node);
   }
-  nodes.push(node);
 
   return nodes;
+}
+
+function isEnd(context, ancestors) {
+  const s = context.source;
+  if (s.startsWith(`<`)) {
+    for (let i = ancestors.length - 1; i >= 0; i--) {
+      const tag = ancestors[i].tag;
+      if (startsWithEndTagOpen(s, tag)) {
+        return true;
+      }
+    }
+  }
+  return !s;
 }
 
 function createRoot(children) {
