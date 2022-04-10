@@ -5,8 +5,11 @@ export function transform(root, options) {
   // 1. 遍历 -深度优先搜索
   traverseNode(root, context);
   // 2. 修改 text content
+  craeteRootCodegen(root)
 }
-
+function craeteRootCodegen(root) {
+    root.codegenNode = root.children[0]
+}
 function createTransformContext(root, options) {
   const context = {
     root,
