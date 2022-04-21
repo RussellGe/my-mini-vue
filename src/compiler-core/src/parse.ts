@@ -7,9 +7,7 @@ const enum TagType {
 
 export function baseParse(content: string) {
   const context = createParseContext(content);
-  return createRoot({
-    children: parseChildren(context, []),
-  });
+  return createRoot(parseChildren(context, []));
 }
 
 function parseInterpolation(context) {
@@ -130,7 +128,10 @@ function isEnd(context, ancestors) {
 }
 
 function createRoot(children) {
-  return children;
+  return {
+    children,
+    type: NodeTypes.ROOT,
+  };
 }
 function createParseContext(content) {
   return {
