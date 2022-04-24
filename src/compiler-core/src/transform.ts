@@ -6,11 +6,11 @@ export function transform(root, options) {
   // 1. 遍历 -深度优先搜索
   traverseNode(root, context);
   // 2. 修改 text content
-  craeteRootCodegen(root);
+  createRootCodegen(root);
 
   root.helpers = [...context.helpers.keys()];
 }
-function craeteRootCodegen(root) {
+function createRootCodegen(root) {
   root.codegenNode = root.children[0];
 }
 function createTransformContext(root, options) {
@@ -30,7 +30,7 @@ function traverseNode(node: any, context) {
   const nodeTransforms = context.nodeTransforms;
   for (let i = 0; i < nodeTransforms.length; i++) {
     const transform = nodeTransforms[i];
-    transform(node);
+    transform(node, context);
   }
 
   switch (node.type) {
