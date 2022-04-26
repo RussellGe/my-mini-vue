@@ -19,6 +19,7 @@ export const camelize = (str: string) => {
     return c ? c.toUpperCase() : "";
   });
 };
+export const isString = (value) => typeof value === 'string'
 
 export const isOn = (key) => /^on[A-Z]/.test(key);
 

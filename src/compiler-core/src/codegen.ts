@@ -1,3 +1,4 @@
+import { isString } from "../../shared";
 import { NodeTypes } from "./ast";
 import {
   CREATE_ELEMENT_VNODE,
@@ -47,29 +48,54 @@ function genNode(node, context) {
     case NodeTypes.ELEMENT:
       genElement(node, context);
       break;
+    case NodeTypes.COMPOUND_EXPRESSION:
+      genCompoundExpression(node, context);
+      break;
     default:
       break;
   }
 }
 
-function genElement(node, context) {
-  const { push, helper } = context;
-  const { tag, children } = node;
-  push(
-    `${helper(
-      CREATE_ELEMENT_VNODE
-    )}("${tag}"), null '`
-  );
-  console.log(children)
+function genCompoundExpression(node, context) {
+  const { push } = context;
+  const { children } = node;
   for (let i = 0; i < children.length; i++) {
     const child = children[i];
-    genNode(child, context);
+    if (isString(child)) {
+      push(child);
+    } else {
+      genNode(child, context);
+    }
   }
-  push(')')
+}
+
+function genElement(node, context) {
+  const { push, helper } = context;
+  const { tag, children, props } = node;
+  push(`${helper(CREATE_ELEMENT_VNODE)}(`);
+  genNodeList(genNullable([tag, props, children]), context);
+  push(")");
+}
+function genNodeList(nodes, context) {
+  const { push } = context;
+  for (let i = 0; i < nodes.length; i++) {
+    const node = nodes[i];
+    if (isString(node)) {
+      push(node);
+    } else {
+      genNode(node, context);
+    }
+
+    if(i < nodes.length -1) {
+      push(', ')
+    }
+  }
+}
+function genNullable(args: any) {
+  return args.map((arg) => arg || "null");
 }
 function genInterpolation(node, context) {
   const { push, helper } = context;
-  console.log("node", node);
   push(`${helper(TO_DISPLAY_STRING)}(`);
   genNode(node.content, context);
   push(")");
