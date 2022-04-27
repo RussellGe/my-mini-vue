@@ -72,7 +72,7 @@ function genCompoundExpression(node, context) {
 function genElement(node, context) {
   const { push, helper } = context;
   const { tag, children, props } = node;
-  push(`${helper(CREATE_ELEMENT_VNODE)}(`);
+  push(`_${helper(CREATE_ELEMENT_VNODE)}(`);
   genNodeList(genNullable([tag, props, children]), context);
   push(")");
 }
@@ -96,7 +96,7 @@ function genNullable(args: any) {
 }
 function genInterpolation(node, context) {
   const { push, helper } = context;
-  push(`${helper(TO_DISPLAY_STRING)}(`);
+  push(`_${helper(TO_DISPLAY_STRING)}(`);
   genNode(node.content, context);
   push(")");
 }
@@ -118,7 +118,7 @@ function createCodegenContext() {
       context.code += source;
     },
     helper(key) {
-      return `_${helperMapName[key]}`;
+      return `${helperMapName[key]}`;
     },
   };
   return context;

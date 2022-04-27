@@ -1,6 +1,9 @@
 import { ShapeFlags } from "../shared/ShapeFlags";
-export const Text = Symbol('Text')
-export const Fragment = Symbol('Fragment')
+export const Text = Symbol("Text");
+export const Fragment = Symbol("Fragment");
+
+export { createVnode as createElementVnode };
+
 export function createVnode(type, props?, children?) {
   const vnode = {
     type,
@@ -10,17 +13,17 @@ export function createVnode(type, props?, children?) {
     key: props && props.key,
     el: null,
     ShapeFlag: getShapeFlag(type),
-    component: null
+    component: null,
   };
   // children
-  if( typeof children === 'string' ) {
-      vnode.ShapeFlag |= ShapeFlags.TEXT_CHILDREN
-  } else if(Array.isArray(children)) {
-      vnode.ShapeFlag |= ShapeFlags.ARRAY_CHILDREN
+  if (typeof children === "string") {
+    vnode.ShapeFlag |= ShapeFlags.TEXT_CHILDREN;
+  } else if (Array.isArray(children)) {
+    vnode.ShapeFlag |= ShapeFlags.ARRAY_CHILDREN;
   }
-  if(vnode.ShapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
-    if(typeof children === 'object') {
-      vnode.ShapeFlag |= ShapeFlags.SLOT_CHILDREN
+  if (vnode.ShapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
+    if (typeof children === "object") {
+      vnode.ShapeFlag |= ShapeFlags.SLOT_CHILDREN;
     }
   }
   return vnode;
@@ -33,5 +36,5 @@ function getShapeFlag(type) {
 }
 
 export function createTextVnode(text) {
-  return createVnode(Text, {}, text)
+  return createVnode(Text, {}, text);
 }
